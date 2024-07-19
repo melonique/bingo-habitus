@@ -1,29 +1,29 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useCookies } from 'next-client-cookies';
 
 export function BingoSheet() {
+ const cookies = useCookies();
   const [toggledItems, setToggledItems] = useState(new Set())
   const [loaded, setLoaded] = useState(false)
   const toggleItem = (index: number) => {
     const newToggledItems = new Set(toggledItems)
+
     if (newToggledItems.has(index)) {
       newToggledItems.delete(index)
     } else {
       newToggledItems.add(index)
     }
     setToggledItems(newToggledItems)
-    if(localStorage) {
-      localStorage.setItem("toggledItems", JSON.stringify(Array.from(newToggledItems)))
-    }
+    cookies.set("toggledItems", JSON.stringify(Array.from(newToggledItems)))
   }
 
   // component on mount look into localstorage and cookies and see if there is a state of checked indexes to
   useEffect(() => {
     setLoaded(false)
-    if(!localStorage) return
 
-    const storedToggledItems = localStorage.getItem("toggledItems")
+    const storedToggledItems = cookies.get("toggledItems")
     if (storedToggledItems) {
       setToggledItems(new Set(JSON.parse(storedToggledItems)))
     }
@@ -36,7 +36,7 @@ export function BingoSheet() {
 
       <p>En circulant dans notre magnifique cour estivale, trouve quelqu’un qui…</p>
       <div className="overflow-scroll w-full">
-        <div className="grid grid-cols-4 m-2 border w-[600px]">
+        <div className="grid grid-cols-4 m-2 border min-w-[600px]">
           {[
             "Joue d’un instrument de musique",
             "Habite ici depuis juin 2017",
@@ -72,6 +72,8 @@ export function BingoSheet() {
       </div>
       <p className="mt-4">La personne qui remporte ce BINGO est celle ayant le plus de bonnes réponses (un petit prix sera offert).</p>
       <p className="mt-2">Bonne recherche! Le comité social Habitus.</p>
+      <p className="mt-2">Votre score: {toggledItems.size}/20</p>
+
     </div>
   )
 }
